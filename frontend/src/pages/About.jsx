@@ -30,7 +30,7 @@ const FACTS = [
 ];
 
 const TEAM = [
-  { name: "Guna Sanjay Sagar", initials: "GS", role: "Founder" },
+  { name: "Guna Sanjay Sagar", initials: "GS", role: "Founder", photo: "/team/guna-sanjay-sagar.webp" },
   { name: "Geetha Reddy", initials: "GR", role: "Co-Founder" },
 ];
 
@@ -155,8 +155,21 @@ export default function About() {
             <div className="mt-10 grid sm:grid-cols-2 gap-px bg-line border border-line">
               {TEAM.map((t, i) => (
                 <Reveal key={t.name} delay={i * 0.08} className="p-6 bg-bg">
-                  <div className="h-40 md:h-44 bg-surface2 hatch mb-5 flex items-end p-3">
-                    <span className="font-grotesk font-semibold text-4xl text-accentText">{t.initials}</span>
+                  {/* Same frame for photo and initials, so cards stay level until every photo is in. */}
+                  <div className="aspect-[5/6] bg-surface2 hatch mb-5 flex items-end p-3 overflow-hidden relative">
+                    {t.photo ? (
+                      <img
+                        src={t.photo}
+                        alt={`${t.name}, ${t.role}`}
+                        width="800"
+                        height="960"
+                        loading="lazy"
+                        className="absolute inset-0 h-full w-full object-cover object-top"
+                        data-testid={`team-photo-${t.initials.toLowerCase()}`}
+                      />
+                    ) : (
+                      <span className="font-grotesk font-semibold text-4xl text-accentText">{t.initials}</span>
+                    )}
                   </div>
                   <h3 className="font-grotesk font-semibold text-base leading-tight">{t.name}</h3>
                   <p className="mt-1 text-xs text-accentText uppercase tracking-wide">{t.role}</p>
