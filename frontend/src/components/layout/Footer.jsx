@@ -17,6 +17,7 @@ const COLS = [
     links: [
       { label: "RepoIQ", to: "/products/repoiq" },
       { label: "All products", to: "/products" },
+      { label: "Growth Ecosystem", to: "/growth" },
     ],
   },
   {

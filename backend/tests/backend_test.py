@@ -196,6 +196,28 @@ class TestProducts:
         assert s.get(f"{API}/products/does-not-exist").status_code == 404
 
 
+# ---------- Growth ecosystem ----------
+class TestGrowth:
+    def test_page_is_complete(self, s):
+        r = s.get(f"{API}/growth")
+        assert r.status_code == 200
+        d = r.json()
+        assert "_id" not in d
+        for k in ("hero", "stages", "marketing", "qualify", "close", "loop", "faqs"):
+            assert d.get(k), f"missing {k}"
+
+    def test_stages_are_the_pipeline(self, s):
+        """The page renders one chapter per stage, keyed by these exact values."""
+        stages = s.get(f"{API}/growth").json()["stages"]
+        assert [st["key"] for st in stages] == ["marketing", "qualify", "close"]
+
+    def test_partner_sections_populated(self, s):
+        d = s.get(f"{API}/growth").json()
+        assert d["marketing"]["clients"] and d["marketing"]["testimonials"]
+        assert d["qualify"]["pricing"] and d["qualify"]["call_flow"]
+        assert d["close"]["routing"] and d["close"]["playbook"]
+
+
 # ---------- Posts ----------
 class TestPosts:
     def test_list_sorted(self, s):

@@ -35,6 +35,9 @@ export const useProducts = () =>
 export const useProduct = (slug) =>
   useQuery({ queryKey: ["product", slug], queryFn: () => get(`/products/${slug}`), enabled: !!slug });
 
+export const useGrowth = () =>
+  useQuery({ queryKey: ["growth"], queryFn: () => get("/growth") });
+
 export const usePosts = () =>
   useQuery({ queryKey: ["posts"], queryFn: () => get("/posts") });
 

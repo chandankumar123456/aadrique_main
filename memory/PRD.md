@@ -49,6 +49,15 @@ Build the flagship marketing website for AADRIQUE TECH PVT LTD — a premium B2B
 ## Content Cleanup (10 June 2026)
 - All "[Placeholder]" markers removed site-wide. Hero trust strip now uses verifiable facts (11 capabilities, 6 industry practices, 1-day response, 100% IP ownership). Case studies (illustrative:true in seed) show "Illustrative engagement" badges + disclosure note on Work/detail pages; testimonial quotes de-prefixed. FAQ/blog performance figures reframed as industry benchmarks. Team section: Ravi Kumar (Managing Director, from user's brand sheets) + two principle cells; fake team members removed. Contact office placeholder removed. Terms §4 updated to "Illustrative content". SEED_VERSION=5.
 
+## Growth Ecosystem (10 Nov 2026)
+- New `/growth` page (nav: Growth): one pipeline, three teams — 01 Attract (brand & digital marketing by The Accura8 Agency), 02 Qualify (Varavox voice agent "Vara" calls back and qualifies every lead), 03 Close (AADRIQUE sales team).
+- Content in `seed_data.py` → `GROWTH` (single doc, `db.growth`), served by GET /api/growth. SEED_VERSION=10.
+- Marketing: Accura8 services, published stats (3.2x ROI, 20+ projects, 98% satisfaction, 5.0 rating — attributed to Accura8), client roster, portfolio counts, two verbatim testimonials (Keerthy Vinu / Edge Opticals, Rahul S / Taxpaie). Source: theaccura8agency.com + Instagram story highlights.
+- Qualify: call flow, sample real-estate qualification call, qualification fields, capabilities, languages/compliance/integrations, Varavox published pricing (₹6/₹9/₹13 per min, ₹15,000/month). Source: varavox.in.
+- Close: sample qualified-lead record, Hot/Warm/Nurture routing, 5-step sales playbook, 3 commitments, feedback loop to marketing.
+- Home teaser section links to each chapter (/growth#marketing etc.); Contact `?interest=growth` pre-selects "Growth ecosystem" in the service dropdown. Desktop nav now shows from xl (1280px) — 8 links overflowed at lg.
+- To confirm with partners: Welcare Fitness, Rana Dental, Citadel Drive, Burger Man, Fusion24, BB Combat are taken from Accura8's Instagram highlights (not their website). Sales routing rules (e.g. "Hot = same working day") are a proposed playbook.
+
 ## Backlog / Remaining
 ### P0
 - Real verified content from user when available: actual metrics, named clients/case studies, real testimonials, team photos, office address

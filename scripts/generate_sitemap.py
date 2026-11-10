@@ -27,6 +27,7 @@ STATIC_ROUTES = [
     ("/industries", "0.9", "monthly"),
     ("/work", "0.8", "monthly"),
     ("/products", "0.9", "monthly"),
+    ("/growth", "0.9", "monthly"),
     ("/insights", "0.8", "weekly"),
     ("/about", "0.7", "monthly"),
     ("/faq", "0.6", "monthly"),
