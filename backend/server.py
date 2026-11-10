@@ -15,7 +15,7 @@ from pymongo.errors import DuplicateKeyError
 from starlette.middleware.cors import CORSMiddleware
 
 from config import settings
-from seed_data import SEED_VERSION, SERVICES, INDUSTRIES, CASE_STUDIES, PRODUCTS, POSTS, FAQS, TESTIMONIALS
+from seed_data import SEED_VERSION, SERVICES, INDUSTRIES, CASE_STUDIES, PRODUCTS, GROWTH, POSTS, FAQS, TESTIMONIALS
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 logger = logging.getLogger("aadrique")
@@ -322,6 +322,15 @@ async def get_product(slug: str):
     return doc
 
 
+@api_router.get("/growth")
+async def get_growth():
+    """The growth ecosystem page: marketing → voice qualification → sales close."""
+    doc = await db.growth.find_one({}, {"_id": 0})
+    if not doc:
+        raise HTTPException(404, "Growth content not found")
+    return doc
+
+
 @api_router.get("/posts")
 async def list_posts(category: Optional[str] = Query(default=None, max_length=80)):
     q = {"category": category} if category else {}
@@ -428,12 +437,13 @@ async def seed_database():
         logger.info("Seed already claimed by another worker — skipping.")
         return
 
-    for name in ("services", "industries", "case_studies", "products", "posts", "faqs", "testimonials"):
+    for name in ("services", "industries", "case_studies", "products", "growth", "posts", "faqs", "testimonials"):
         await db[name].delete_many({})
     await db.services.insert_many([{**s, "order": i} for i, s in enumerate(SERVICES)])
     await db.industries.insert_many([{**s, "order": i} for i, s in enumerate(INDUSTRIES)])
     await db.case_studies.insert_many([{**s, "order": i} for i, s in enumerate(CASE_STUDIES)])
     await db.products.insert_many([{**s, "order": i} for i, s in enumerate(PRODUCTS)])
+    await db.growth.insert_one(dict(GROWTH))
     await db.posts.insert_many([dict(p) for p in POSTS])
     await db.faqs.insert_many([{**s, "order": i} for i, s in enumerate(FAQS)])
     await db.testimonials.insert_many([dict(t) for t in TESTIMONIALS])

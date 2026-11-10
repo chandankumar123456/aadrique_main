@@ -1,4 +1,4 @@
-SEED_VERSION = "9"
+SEED_VERSION = "10"
 
 SERVICES = [
     {
@@ -1085,6 +1085,210 @@ PRODUCTS = [
         "saas": SAAS_CAPABILITIES,
     },
 ]
+
+# The growth ecosystem: one pipeline run by three teams. Marketing is delivered by
+# The Accura8 Agency, lead qualification by Varavox voice agents, and the close by
+# the AADRIQUE sales team. Partner facts below are taken from each partner's own
+# published site — keep them in step with theaccura8agency.com and varavox.in.
+GROWTH = {
+    "hero": {
+        "label": "The AADRIQUE Ecosystem",
+        "lines": ["Attract.", "Qualify.", "Close."],
+        "summary": "One pipeline, three specialist teams. Brand and digital marketing bring the enquiries in, a voice agent calls every lead back in seconds and qualifies it, and our sales team closes the ones that are ready — with nothing lost between the steps.",
+    },
+    "stages": [
+        {
+            "key": "marketing",
+            "step": "01",
+            "verb": "Attract",
+            "title": "Brand & digital marketing",
+            "partner": "The Accura8 Agency",
+            "summary": "Branding, content, SEO and paid campaigns that turn attention into enquiries.",
+            "output": "An enquiry",
+            "headline": ["Brands that bring", "enquiries in."],
+        },
+        {
+            "key": "qualify",
+            "step": "02",
+            "verb": "Qualify",
+            "title": "Voice agent qualification",
+            "partner": "Varavox",
+            "summary": "Every new lead is called back within seconds, in their language, and qualified on the call.",
+            "output": "A qualified lead",
+            "headline": ["Every lead called back", "in seconds."],
+        },
+        {
+            "key": "close",
+            "step": "03",
+            "verb": "Close",
+            "title": "Sales team close",
+            "partner": "AADRIQUE Sales",
+            "summary": "A named salesperson picks up the qualified lead with the full call context and takes it to a decision.",
+            "output": "A customer",
+            "headline": ["A person closes it", "while it's warm."],
+        },
+    ],
+    "marketing": {
+        "partner": "The Accura8 Agency",
+        "url": "https://theaccura8agency.com/",
+        "instagram": "https://www.instagram.com/theaccura8agency/",
+        "motto": "Create. Launch. Grow. Repeat.",
+        "base": "Chennai · Trivandrum",
+        "reach": "Tamil Nadu, Kerala, Bengaluru and the UAE",
+        "intro": "Marketing in the ecosystem is delivered by The Accura8 Agency — a creative and marketing studio founded in Chennai in 2025, working with startups and established brands. Creative storytelling paired with data-driven strategy, measured by the enquiries it produces rather than the impressions it buys.",
+        "stats_note": "Figures as published by The Accura8 Agency.",
+        "stats": [
+            {"value": "3.2x", "label": "Average ROI on digital marketing"},
+            {"value": "20+", "label": "Projects delivered"},
+            {"value": "98%", "label": "Client satisfaction"},
+            {"value": "5.0", "label": "Average rating across platforms"},
+        ],
+        "services": [
+            {"title": "Digital marketing", "desc": "Social media marketing, SEO, performance marketing and campaign strategy, with analytics on every channel.", "tags": ["SMM", "SEO", "Paid ads", "Analytics"]},
+            {"title": "Branding & identity", "desc": "Logos, brand systems, packaging and guidelines that make a business recognisable before it says a word.", "tags": ["Logo", "Brand system", "Packaging", "Guidelines"]},
+            {"title": "Creative & design", "desc": "Campaign creatives, social posts and print — the assets that carry a campaign across every platform.", "tags": ["Campaigns", "Social", "Print"]},
+            {"title": "Video production", "desc": "Brand films, reels and AI-generated video built for the feeds people actually scroll.", "tags": ["Reels", "Brand film", "AI video"]},
+            {"title": "Websites & UI", "desc": "Websites, landing pages, app UI and dashboards designed to convert visitors into enquiries.", "tags": ["Web design", "Landing pages", "App UI"]},
+        ],
+        "channels": ["Instagram", "Facebook", "Meta Ads", "Google Ads", "Google Reviews", "LinkedIn", "WhatsApp"],
+        "clients": [
+            {"name": "Edge Opticals", "location": "Kochi, Kerala", "work": "Brand identity · AI video"},
+            {"name": "Taxpaie Business Consulting", "location": "Marthandam, Tamil Nadu", "work": "Website design & development"},
+            {"name": "Welcare Fitness", "location": "", "work": ""},
+            {"name": "Rana Dental", "location": "", "work": ""},
+            {"name": "Citadel Drive", "location": "", "work": ""},
+            {"name": "Burger Man", "location": "", "work": ""},
+            {"name": "Fusion24", "location": "", "work": ""},
+            {"name": "BB Combat", "location": "", "work": ""},
+        ],
+        "portfolio": [
+            {"title": "Posters & designs", "count": "25+", "tags": ["Campaign creatives", "Social media", "Print"]},
+            {"title": "Branding & identity", "count": "9", "tags": ["Logo", "Brand system", "Packaging"]},
+            {"title": "Website & UI design", "count": "5", "tags": ["Web design", "App UI", "Dashboards"]},
+        ],
+        "testimonials": [
+            {
+                "quote": "We recently received an AI video from Accura8, and it turned out absolutely superb. The quality and creativity were beyond our expectations. Truly impressed with their work. We look forward to working with them again.",
+                "name": "Keerthy Vinu",
+                "role": "Executive",
+                "company": "Edge Opticals",
+                "location": "Kochi, Kerala",
+            },
+            {
+                "quote": "We collaborated on our website development and design, and the results were outstanding — visually appealing and responsive. The team delivered a professional, creative site that exceeded our expectations. Highly recommended!",
+                "name": "Rahul S",
+                "role": "Executive",
+                "company": "Taxpaie Business Consulting",
+                "location": "Marthandam, Tamil Nadu",
+            },
+        ],
+    },
+    "qualify": {
+        "partner": "Varavox",
+        "url": "https://varavox.in/",
+        "agent": "Vara",
+        "intro": "The moment a campaign produces an enquiry, Vara — the Varavox voice agent — calls it back. Someone fills a form and their phone rings before they have closed the tab. Vara answers questions, asks the qualifying ones, books the next step and writes everything down, around the clock.",
+        "highlights": [
+            {"value": "Seconds", "label": "From form fill to callback"},
+            {"value": "24/7", "label": "Every call answered, first ring"},
+            {"value": "4+", "label": "Indian languages, switched mid-call"},
+            {"value": "Every call", "label": "Summarised, transcribed, logged"},
+        ],
+        "languages": ["English", "Hindi", "Telugu", "Tamil", "Kannada on request"],
+        "call_flow": [
+            {"title": "Lead comes in", "desc": "A website form, Meta lead ad, WhatsApp message or missed call — at any hour."},
+            {"title": "Vara calls back", "desc": "Within seconds, with your business name, in the caller's language. No voicemail, no hold music."},
+            {"title": "Understands the need", "desc": "Answers questions on pricing, timings and location, and asks the qualifying follow-ups."},
+            {"title": "Books the next step", "desc": "Finds a free slot on your calendar — a site visit, a demo, a consultation — and confirms it on the call."},
+            {"title": "Hands over the lead", "desc": "Summary, budget, timeline and score land in the CRM, with a WhatsApp confirmation to the caller."},
+        ],
+        "sample_call": {
+            "context": "Sample call · Real-estate lead callback",
+            "lines": [
+                {"speaker": "Vara", "text": "Hi Priya, this is Greenfield Homes. You just enquired about our 2BHK flats in Kokapet. Is this a good time?"},
+                {"speaker": "Caller", "text": "Yes. What is the price range?"},
+                {"speaker": "Vara", "text": "2BHKs start at 85 lakh. Are you looking to buy in the next three months?"},
+                {"speaker": "Caller", "text": "Probably, yes. Can I see the flat this weekend?"},
+                {"speaker": "Vara", "text": "Saturday at 11 works for our site team. I've booked it and shared the location on WhatsApp."},
+            ],
+            "outcome": "Hot lead: budget and timeline captured. Site visit booked for Saturday.",
+        },
+        "qualifies_on": [
+            {"title": "Need", "desc": "What they enquired about and what problem they are trying to solve."},
+            {"title": "Budget", "desc": "Whether the price range fits, asked plainly and recorded as said."},
+            {"title": "Timeline", "desc": "When they intend to buy — this month, this quarter, or just looking."},
+            {"title": "Next step", "desc": "A booked visit, demo or meeting, or the reason one wasn't booked."},
+        ],
+        "capabilities": [
+            {"title": "Calls new leads back in seconds", "desc": "Website forms, Meta lead ads and missed calls trigger an immediate callback."},
+            {"title": "Books on your calendar", "desc": "Finds a free slot in Google Calendar and books the appointment during the call."},
+            {"title": "Sends WhatsApp mid-call", "desc": "Shares a brochure, a map pin or a payment link while the customer is still on the line."},
+            {"title": "Writes the call summary", "desc": "A clean summary, sentiment and extracted fields for every call. Nothing logged by hand."},
+            {"title": "Updates your CRM", "desc": "Writes the lead, the deal and the next step the moment the call ends — Sheets, Zoho, HubSpot or the Varavox CRM."},
+            {"title": "Hands over to your team", "desc": "When a caller needs a person, the agent transfers the call or passes the details on straight away."},
+        ],
+        "compliance": [
+            "DLT-registered numbers",
+            "DNC and DND screening",
+            "TRAI-compliant calling",
+            "Callers told they are speaking with an AI",
+            "Recordings stay in your account",
+        ],
+        "integrations": ["Google Sheets", "Google Calendar", "WhatsApp Business", "Zoho", "HubSpot", "Zapier", "Pabbly Connect", "Meta lead ads"],
+        "pricing_note": "Varavox's published pricing. Phone numbers and concurrency are billed separately and agreed upfront.",
+        "pricing": [
+            {"name": "Starter", "price": "₹6", "unit": "per minute", "for": "Try Vara on a small call volume", "featured": False, "items": ["1 voice agent on your number", "English + Hindi, or English + Telugu", "Call summary and transcript for every call", "Call logs exported to Google Sheets"]},
+            {"name": "Premium", "price": "₹9", "unit": "per minute", "for": "For real customer-facing work", "featured": True, "items": ["Everything in Starter", "Premium Indic voice, lower latency", "Varavox CRM — contacts, deals, call history", "Google Calendar booking mid-call", "Webhooks, Zapier and Pabbly Connect"]},
+            {"name": "Pro", "price": "₹13", "unit": "per minute", "for": "High-ticket calls where the voice closes the deal", "featured": False, "items": ["Everything in Premium", "Most lifelike voice, ultra-low latency", "Caller memory across sessions", "Sentiment and structured data per call", "Custom integrations with any CRM"]},
+            {"name": "Full Package", "price": "₹15,000", "unit": "per month", "for": "Built, run and tuned for you", "featured": False, "items": ["Everything in Pro", "WhatsApp setup, templates, bulk and inbox", "Varavox CRM fully managed", "Calling flows built end-to-end", "Weekly report and monthly strategy call"]},
+        ],
+    },
+    "close": {
+        "intro": "A qualified lead is only worth something if a person acts on it while it is warm. Our sales team takes over from Vara with the whole conversation already in hand — so the customer never has to repeat themselves, and nobody calls in blind.",
+        "lead_card": {
+            "label": "Qualified lead · handed to sales",
+            "fields": [
+                {"k": "Lead", "v": "Priya · via Instagram ad"},
+                {"k": "Interest", "v": "2BHK, Kokapet"},
+                {"k": "Budget", "v": "Fits — from ₹85L"},
+                {"k": "Timeline", "v": "Within 3 months"},
+                {"k": "Next step", "v": "Site visit · Sat 11:00"},
+                {"k": "Language", "v": "English"},
+            ],
+            "score": "Hot",
+            "owner": "Assigned to a named salesperson",
+        },
+        "routing": [
+            {"tier": "Hot", "rule": "Budget fits, buying within 90 days, next step booked.", "action": "A salesperson calls the same working day and owns the lead to close."},
+            {"tier": "Warm", "rule": "Real interest, but budget or timing not yet settled.", "action": "Sales follow up on the date the lead gave, with WhatsApp touchpoints in between."},
+            {"tier": "Nurture", "rule": "Just looking, or not a fit today.", "action": "Handed back to marketing for retargeting and content until they are ready."},
+        ],
+        "playbook": [
+            {"title": "Read the call first", "desc": "Before dialling, the salesperson reads Vara's summary and transcript — need, budget, timeline and objections already known."},
+            {"title": "Meet on the booked slot", "desc": "The site visit, demo or consultation Vara booked is kept. Reminders on WhatsApp cut no-shows."},
+            {"title": "Propose against the need", "desc": "A proposal built on what the customer actually said on the call, not a generic brochure."},
+            {"title": "Close and onboard", "desc": "Agreement, payment link and onboarding handled in one sequence, with the customer told exactly what happens next."},
+            {"title": "Report back to marketing", "desc": "Every won and lost deal is tagged to the campaign that produced it, so spend moves to what closes — not to what clicks."},
+        ],
+        "commitments": [
+            {"title": "Every qualified lead has an owner", "desc": "A named person, not a shared inbox. If they are away, the lead is reassigned, not parked."},
+            {"title": "No lead goes cold silently", "desc": "Every lead ends in a decision — won, lost with a reason, or handed back to nurture. Nothing is left unanswered."},
+            {"title": "One record, end to end", "desc": "The ad, the call and the sales conversation sit in a single CRM record, visible to all three teams."},
+        ],
+    },
+    "loop": {
+        "title": "The loop that improves itself",
+        "desc": "Closed revenue is reported back by campaign, voice-agent call outcomes show which messages create real intent, and leads that weren't ready return to marketing instead of disappearing. Each turn of the loop makes the next campaign cheaper to close.",
+    },
+    "faqs": [
+        {"q": "Can I use one stage without the others?", "a": "Yes. Each team works on its own — marketing only, a voice agent on your existing leads, or sales support on enquiries you already generate. They are designed to work best together, because the hand-offs are where most leads are lost."},
+        {"q": "Who are The Accura8 Agency and Varavox?", "a": "They are the specialist partners in the AADRIQUE ecosystem. The Accura8 Agency runs brand and digital marketing; Varavox builds the voice agents that call back and qualify leads. AADRIQUE coordinates the pipeline and runs the sales close."},
+        {"q": "Will callers know they are speaking to an AI?", "a": "Yes. Callers are told they are speaking with an automated assistant, and can be transferred to a person whenever they need one."},
+        {"q": "Which languages does the voice agent speak?", "a": "English, Hindi, Telugu and Tamil today, with Kannada and others on request. The agent replies in the language the caller uses and can switch mid-call."},
+        {"q": "What does it cost?", "a": "Marketing and sales engagements are quoted after a free consultation, based on your goals and lead volume. Voice-agent calling follows Varavox's published per-minute pricing, from ₹6 a minute."},
+        {"q": "How do I know it is working?", "a": "Every stage reports into one record: leads by campaign, calls answered and qualified by the voice agent, and deals closed by sales. You see cost per qualified lead and cost per customer, not just clicks."},
+    ],
+}
 
 POSTS = [
     {

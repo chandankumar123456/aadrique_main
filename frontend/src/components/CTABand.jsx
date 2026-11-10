@@ -3,6 +3,7 @@ import { ArrowUpRight } from "lucide-react";
 import { Reveal } from "@/components/motion/Reveal";
 
 export const CTABand = ({
+  to = "/contact",
   title = "Let's find your next advantage.",
   subtitle = "A 30-minute conversation about your business. No pitch, no jargon — just an honest read on where technology can move your numbers.",
 }) => (
@@ -17,7 +18,7 @@ export const CTABand = ({
         <p className="mt-6 max-w-xl text-[#0A0A0A]/75 text-base md:text-lg leading-relaxed">{subtitle}</p>
         <div className="mt-8 flex flex-wrap gap-4">
           <Link
-            to="/contact"
+            to={to}
             data-testid="cta-band-book-btn"
             className="group inline-flex items-center gap-3 bg-[#0A0A0A] text-[#F6F0DE] px-8 py-4 font-grotesk font-medium tracking-wide hover:bg-white hover:text-[#0A0A0A] transition-colors duration-300"
           >

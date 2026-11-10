@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { Mail, Phone, MapPin, ArrowUpRight } from "lucide-react";
 import { Seo } from "@/components/Seo";
 import { LineReveal, Reveal } from "@/components/motion/Reveal";
+import { useSearchParams } from "react-router-dom";
 import { submitContact, useServices } from "@/lib/api";
 import { SITE } from "@/lib/site";
 
@@ -20,6 +21,9 @@ const schema = z.object({
   website: z.string().max(0).optional(),
 });
 
+// Offered alongside the capabilities; ?interest=growth pre-selects it.
+const GROWTH_INTEREST = "Growth ecosystem (marketing, voice agent, sales)";
+
 const BUDGETS = ["Under $10k", "$10k – $25k", "$25k – $75k", "$75k+", "Not sure yet"];
 
 const inputCls =
@@ -28,12 +32,16 @@ const labelCls = "label-tech text-mutedInk block mb-2";
 
 export default function Contact() {
   const { data: services = [] } = useServices();
+  const [params] = useSearchParams();
   const {
     register,
     handleSubmit,
     reset,
     formState: { errors, isSubmitting },
-  } = useForm({ resolver: zodResolver(schema), defaultValues: { website: "" } });
+  } = useForm({
+    resolver: zodResolver(schema),
+    defaultValues: { website: "", service_interest: params.get("interest") === "growth" ? GROWTH_INTEREST : "" },
+  });
 
   const onSubmit = async (values) => {
     try {
@@ -114,6 +122,7 @@ export default function Contact() {
                     {services.map((s) => (
                       <option key={s.slug} value={s.title}>{s.title}</option>
                     ))}
+                    <option value={GROWTH_INTEREST}>{GROWTH_INTEREST}</option>
                     <option value="General enquiry">General enquiry</option>
                   </select>
                 </div>

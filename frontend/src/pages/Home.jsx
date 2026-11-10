@@ -7,7 +7,7 @@ import { LineReveal, Reveal, Stagger, StaggerItem } from "@/components/motion/Re
 import { Marquee } from "@/components/Marquee";
 import { CTABand } from "@/components/CTABand";
 import { ProductCard } from "@/components/ProductCard";
-import { useServices, useIndustries, useCaseStudies, useProducts, usePosts } from "@/lib/api";
+import { useServices, useIndustries, useCaseStudies, useProducts, usePosts, useGrowth } from "@/lib/api";
 import { serviceIcon } from "@/lib/icons";
 import { SITE, EASE } from "@/lib/site";
 
@@ -38,6 +38,7 @@ export default function Home() {
   const { data: caseStudies = [] } = useCaseStudies();
   const { data: products = [] } = useProducts();
   const { data: posts = [] } = usePosts();
+  const { data: growth } = useGrowth();
   const heroRef = useRef(null);
   const { scrollYProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] });
   const yA = useTransform(scrollYProgress, [0, 1], [0, 140]);
@@ -187,6 +188,47 @@ export default function Home() {
                 </Reveal>
               ))}
             </div>
+          </div>
+        </section>
+      )}
+
+      {/* ── Growth ecosystem ─────────────────────────── */}
+      {growth?.stages?.length > 0 && (
+        <section className="py-12 md:py-16 border-b border-line" data-testid="home-growth-section">
+          <div className="max-w-7xl mx-auto px-6 lg:px-10">
+            <Reveal className="flex flex-wrap items-end justify-between gap-6 mb-10">
+              <div>
+                <p className="label-tech text-accentText mb-6 flex items-center gap-4">
+                  <span className="inline-block h-4 w-px rotate-[30deg] bg-accent" />
+                  {growth.hero.label}
+                </p>
+                <h2 className="font-grotesk font-semibold tracking-tight text-4xl md:text-5xl max-w-3xl">
+                  {growth.hero.lines.join(" ")}
+                </h2>
+              </div>
+              <Link
+                to="/growth"
+                data-testid="home-growth-link"
+                className="link-underline font-grotesk text-sm uppercase tracking-[0.12em] text-mutedInk hover:text-inkStrong transition-colors duration-300"
+              >
+                See the pipeline →
+              </Link>
+            </Reveal>
+            <Stagger className="grid md:grid-cols-3 gap-px bg-line border border-line" stagger={0.08}>
+              {growth.stages.map((st) => (
+                <StaggerItem key={st.key} className="h-full">
+                  <Link
+                    to={`/growth#${st.key}`}
+                    data-testid={`home-growth-stage-${st.key}`}
+                    className="group flex h-full flex-col p-8 bg-bg hover:bg-surface transition-colors duration-300"
+                  >
+                    <span className="label-tech text-accentText">{st.step} — {st.partner}</span>
+                    <p className="mt-6 font-grotesk font-semibold text-3xl group-hover:text-accentText transition-colors duration-300">{st.verb}</p>
+                    <p className="mt-3 text-sm text-mutedInk leading-relaxed">{st.summary}</p>
+                  </Link>
+                </StaggerItem>
+              ))}
+            </Stagger>
           </div>
         </section>
       )}

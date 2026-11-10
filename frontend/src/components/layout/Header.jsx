@@ -36,7 +36,7 @@ export const Header = ({ theme, toggleTheme }) => {
             />
           </Link>
 
-          <nav className="hidden lg:flex items-center gap-8" aria-label="Primary">
+          <nav className="hidden xl:flex items-center gap-8" aria-label="Primary">
             {NAV_LINKS.map((l) => (
               <NavLink
                 key={l.to}
@@ -74,7 +74,7 @@ export const Header = ({ theme, toggleTheme }) => {
               onClick={() => setOpen(!open)}
               data-testid="mobile-menu-btn"
               aria-label="Toggle menu"
-              className="lg:hidden p-2 border border-line text-inkStrong"
+              className="xl:hidden p-2 border border-line text-inkStrong"
             >
               {open ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
             </button>
