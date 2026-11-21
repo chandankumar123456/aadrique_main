@@ -1,5 +1,5 @@
 import "@/App.css";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { MotionConfig } from "framer-motion";
 import { Toaster } from "sonner";
 import Layout from "@/components/layout/Layout";
@@ -14,6 +14,10 @@ import CaseStudyDetail from "@/pages/CaseStudyDetail";
 import Products from "@/pages/Products";
 import ProductDetail from "@/pages/ProductDetail";
 import Growth from "@/pages/Growth";
+import Programme from "@/pages/Programme";
+import ProgrammeApply from "@/pages/ProgrammeApply";
+import AdminDashboard from "@/pages/AdminDashboard";
+import { PROGRAMME_PATH, PROGRAMME_APPLY } from "@/lib/programme";
 import Insights from "@/pages/Insights";
 import ArticleDetail from "@/pages/ArticleDetail";
 import FAQPage from "@/pages/FAQPage";
@@ -29,8 +33,16 @@ function App() {
       <MotionConfig reducedMotion="user">
         <BrowserRouter>
           <Routes>
+            {/* Admin has its own chrome — no marketing header, footer or promo bar. */}
+            <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/admin/*" element={<Navigate to="/admin" replace />} />
             <Route element={<Layout />}>
-              <Route path="/" element={<Home />} />
+              {/* Shared links to the bare domain land on the AI Engineering Programme;
+                  the company homepage lives at /home. */}
+              <Route path="/" element={<Navigate to={PROGRAMME_PATH} replace />} />
+              <Route path={PROGRAMME_PATH} element={<Programme />} />
+              <Route path={PROGRAMME_APPLY} element={<ProgrammeApply />} />
+              <Route path="/home" element={<Home />} />
               <Route path="/about" element={<About />} />
               <Route path="/capabilities" element={<Capabilities />} />
               <Route path="/capabilities/:slug" element={<ServiceDetail />} />
@@ -47,6 +59,7 @@ function App() {
               <Route path="/contact" element={<Contact />} />
               <Route path="/privacy-policy" element={<Legal page="privacy" />} />
               <Route path="/terms" element={<Legal page="terms" />} />
+              <Route path="/refund-policy" element={<Legal page="refund" />} />
               <Route path="*" element={<NotFound />} />
             </Route>
           </Routes>

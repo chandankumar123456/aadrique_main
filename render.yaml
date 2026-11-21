@@ -48,6 +48,16 @@ services:
       - key: TRUST_PROXY
         value: "true"
 
+      # Google OAuth Web client ID for programme applications (Sign in with Google).
+      # Blank disables online applications. See DEPLOYMENT.md.
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      # Google accounts allowed into the /admin dashboard, comma-separated.
+      - key: ADMIN_EMAILS
+        sync: false
+      # Payment link for the programme fee (₹14,999 + 18% GST).
+      - key: RAZORPAY_PAYMENT_LINK
+        value: https://razorpay.me/@kondusrivardhanrao
       # Transactional email (via Resend) — optional. Without these, enquiries are
       # still stored in MongoDB, but no notification or auto-reply is sent.
       - key: OWNER_EMAIL

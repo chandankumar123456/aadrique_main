@@ -8,13 +8,24 @@ import uuid
 
 import httpx
 from fastapi import APIRouter, BackgroundTasks, Depends, FastAPI, Header, HTTPException, Query, Request
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, Response
 from motor.motor_asyncio import AsyncIOMotorClient
 from pydantic import BaseModel, Field, field_validator
 from pymongo.errors import DuplicateKeyError
+from starlette.concurrency import run_in_threadpool
 from starlette.middleware.cors import CORSMiddleware
 
 from config import settings
+import programme
+from programme import (
+    AdminUpdate,
+    CredentialIn,
+    GoogleAuthError,
+    GoogleUnavailableError,
+    PaymentReport,
+    ProgrammeApplication,
+    TxnUpdate,
+)
 from seed_data import SEED_VERSION, SERVICES, INDUSTRIES, CASE_STUDIES, PRODUCTS, GROWTH, POSTS, FAQS, TESTIMONIALS
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
@@ -191,8 +202,12 @@ def client_ip(request: Request) -> str:
     return request.client.host if request.client else "unknown"
 
 
-def rate_limit_exceeded(ip: str) -> bool:
-    """Sliding-window limiter with bounded memory (single-process; see DEPLOYMENT.md)."""
+def rate_limit_exceeded(ip: str, limit: Optional[int] = None) -> bool:
+    """Sliding-window limiter with bounded memory (single-process; see DEPLOYMENT.md).
+
+    `ip` is the bucket key; callers may namespace it (e.g. "programme:<ip>") to get
+    a separate budget with its own `limit`.
+    """
     global _rate_last_prune
     now = time.time()
     window = settings.contact_rate_window
@@ -207,7 +222,7 @@ def rate_limit_exceeded(ip: str) -> bool:
         _rate_last_prune = now
 
     hits = [t for t in _rate.get(ip, []) if now - t < window]
-    if len(hits) >= settings.contact_rate_limit:
+    if len(hits) >= (limit or settings.contact_rate_limit):
         _rate[ip] = hits
         return True
     hits.append(now)
@@ -222,10 +237,12 @@ def rate_limit_exceeded(ip: str) -> bool:
 async def require_admin(
     authorization: Optional[str] = Header(default=None),
     x_admin_token: Optional[str] = Header(default=None),
-) -> None:
-    """Guard for endpoints exposing stored personal data.
+) -> str:
+    """Guard for endpoints exposing stored personal data. Returns who is acting.
 
-    Accepts `Authorization: Bearer <token>` or `X-Admin-Token: <token>`.
+    Accepts the static ADMIN_TOKEN (scripts, curl) or an admin session issued by
+    /api/admin/session after a Google sign-in by an ADMIN_EMAILS account — either
+    as `Authorization: Bearer <token>` or `X-Admin-Token: <token>`.
     """
     if not settings.admin_token:
         raise HTTPException(503, "Admin API is not configured on this deployment.")
@@ -234,8 +251,12 @@ async def require_admin(
         presented = authorization[7:].strip()
     elif x_admin_token:
         presented = x_admin_token.strip()
-    if not settings.check_admin_token(presented):
-        raise HTTPException(401, "Unauthorized")
+    if settings.check_admin_token(presented):
+        return "admin-token"
+    email = programme.read_admin_session(presented, settings.admin_token, settings.admin_emails)
+    if email:
+        return email
+    raise HTTPException(401, "Unauthorized")
 
 
 # --------------------------------------------------------------------------------------
@@ -406,6 +427,449 @@ async def list_enquiries(
 
 
 # --------------------------------------------------------------------------------------
+# AI Engineering Programme — Google Sign-In applications
+# --------------------------------------------------------------------------------------
+
+# Higher than the contact form's: a whole college lab can share one public IP, and
+# each applicant makes two calls (sign-in lookup + submit). Google verification is
+# the real gate against abuse here.
+PROGRAMME_RATE_LIMIT = 30
+
+
+async def google_claims(credential: str) -> dict:
+    """Verify a Google ID token or fail the request with a clear status."""
+    if not settings.google_client_id:
+        raise HTTPException(503, "Applications are not open online yet. Please use the contact form.")
+    try:
+        return await run_in_threadpool(
+            programme.verify_google_credential, credential, settings.google_client_id
+        )
+    except GoogleAuthError as e:
+        logger.info("Rejected Google credential: %s", e)
+        raise HTTPException(401, "Your Google sign-in has expired or is invalid. Please sign in again.")
+    except GoogleUnavailableError as e:
+        logger.error("Could not reach Google to verify a sign-in: %s", e)
+        raise HTTPException(503, "We couldn't reach Google to verify your sign-in. Please try again shortly.")
+
+
+async def _seats_paid() -> int:
+    """Confirmed admissions: fully paid and not revoked."""
+    return await db.programme_applications.count_documents({"payment_status": "verified", "status": {"$ne": "revoked"}})
+
+
+async def _early_bird_claimed() -> int:
+    """Early-bird seats held: early-bird plan, a live payment (reported/partial/paid), not revoked."""
+    return await db.programme_applications.count_documents({
+        "fee_plan": "early_bird",
+        "status": {"$ne": "revoked"},
+        "payment_status": {"$in": list(programme.ACTIVE_PAYMENT_STATES)},
+    })
+
+
+async def _current_plan() -> str:
+    """Today's price: early-bird until its seats are claimed, then regular."""
+    return "early_bird" if await _early_bird_claimed() < programme.EARLY_BIRD_SEATS else "regular"
+
+
+@api_router.get("/programme/config")
+async def programme_config():
+    """Public: Sign-in config, fee, payment link and real early-bird availability."""
+    try:
+        claimed = await _early_bird_claimed()
+    except Exception as e:  # noqa: BLE001 — availability is a nice-to-have; never break the page
+        logger.error("Could not count early-bird seats: %s", e)
+        claimed = None
+    plan = "early_bird" if claimed is None or claimed < programme.EARLY_BIRD_SEATS else "regular"
+    return {
+        "early_bird": {
+            "total": programme.EARLY_BIRD_SEATS,
+            "left": None if claimed is None else max(0, programme.EARLY_BIRD_SEATS - claimed),
+            "open": plan == "early_bird",
+        },
+        "regular_fee": programme.fee_breakdown("regular"),
+        "enabled": bool(settings.google_client_id),
+        "google_client_id": settings.google_client_id or None,
+        "cohort": programme.COHORT,
+        "fee": programme.fee_breakdown(plan),
+        "payment_link": settings.razorpay_payment_link or None,
+    }
+
+
+@api_router.post("/programme/session")
+async def programme_session(body: CredentialIn, request: Request):
+    """Exchange a Google credential for the student's profile and any existing application."""
+    if rate_limit_exceeded(f"programme:{client_ip(request)}", PROGRAMME_RATE_LIMIT):
+        raise HTTPException(429, "Too many requests. Please try again in a minute.")
+    claims = await google_claims(body.credential)
+    doc = await db.programme_applications.find_one({"google_sub": claims["sub"]}, {"_id": 0})
+    return {
+        "profile": programme.profile_from_claims(claims),
+        "application": programme.public_application(doc, await _current_plan()),
+    }
+
+
+@api_router.post("/programme/applications")
+async def submit_programme_application(
+    app_in: ProgrammeApplication, request: Request, background: BackgroundTasks
+):
+    """Create or update the signed-in student's application (one per Google account)."""
+    if app_in.website:
+        logger.info("Programme honeypot triggered from %s", client_ip(request))
+        return {"ok": True}
+    if rate_limit_exceeded(f"programme:{client_ip(request)}", PROGRAMME_RATE_LIMIT):
+        raise HTTPException(429, "Too many requests. Please try again in a minute.")
+
+    claims = await google_claims(app_in.credential)
+    profile = programme.profile_from_claims(claims)
+    now = datetime.now(timezone.utc).isoformat()
+    fields = {k: getattr(app_in, k) for k in programme.APPLICATION_FIELDS}
+
+    result = await db.programme_applications.update_one(
+        {"google_sub": claims["sub"]},
+        {
+            "$set": {
+                **fields,
+                "email": profile["email"],
+                "google_name": profile["name"],
+                "picture": profile["picture"],
+                "updated_at": now,
+            },
+            "$setOnInsert": {
+                "id": str(uuid.uuid4()),
+                "google_sub": claims["sub"],
+                "cohort": programme.COHORT,
+                "status": "applied",
+                "payments": [],
+                "payment_status": "unpaid",
+                "amount_paid": 0,
+                "amount_pending": 0,
+                "created_at": now,
+            },
+        },
+        upsert=True,
+    )
+    is_new = result.upserted_id is not None
+    doc = await db.programme_applications.find_one({"google_sub": claims["sub"]}, {"_id": 0})
+
+    if settings.email_enabled:
+        background.add_task(
+            send_email,
+            settings.owner_email,
+            ("New programme application: " if is_new else "Programme application updated: ")
+            + f"{doc['full_name']} — {doc['college']}",
+            programme.owner_application_html(doc, is_new),
+            doc["email"],
+        )
+        if is_new:
+            background.add_task(
+                send_email,
+                doc["email"],
+                "Application received — Complete AI Engineering Programme",
+                programme.student_confirmation_html(doc),
+                settings.owner_email,
+            )
+
+    return {"ok": True, "created": is_new, "application": programme.public_application(doc, await _current_plan())}
+
+
+async def _save_payments(app_id: str, payments: list, plan: str, extra: Optional[dict] = None) -> dict:
+    """Persist the transactions, the fields derived from them and the price plan.
+
+    The plan stays locked while the student has a live payment; if every payment is
+    rejected the lock (and any early-bird seat it held) is released.
+    """
+    now = datetime.now(timezone.utc).isoformat()
+    summary = programme.summarize_payments(payments, plan)
+    locked = summary["payment_status"] in programme.ACTIVE_PAYMENT_STATES
+    await db.programme_applications.update_one(
+        {"id": app_id},
+        {"$set": {
+            "payments": payments, **summary,
+            "fee_plan": plan if locked else None,
+            "fee_total": programme.fee_breakdown(plan)["total"] if locked else None,
+            **(extra or {}), "updated_at": now,
+        }},
+    )
+    return await db.programme_applications.find_one({"id": app_id}, {"_id": 0})
+
+
+@api_router.post("/programme/payment")
+async def report_programme_payment(body: PaymentReport, request: Request, background: BackgroundTasks):
+    """The signed-in student reports a Razorpay transaction for the team to verify.
+
+    A student may report several (e.g. a deposit, then the balance). Each transaction
+    ID can be claimed once across all applications.
+    """
+    if rate_limit_exceeded(f"programme:{client_ip(request)}", PROGRAMME_RATE_LIMIT):
+        raise HTTPException(429, "Too many requests. Please try again in a minute.")
+    claims = await google_claims(body.credential)
+    doc = await db.programme_applications.find_one({"google_sub": claims["sub"]}, {"_id": 0})
+    if not doc:
+        raise HTTPException(404, "Please submit your application before reporting a payment.")
+    if doc.get("status") == "revoked":
+        raise HTTPException(403, "This application has been cancelled. Please contact us.")
+    locked = doc.get("fee_plan") and doc.get("payment_status") in programme.ACTIVE_PAYMENT_STATES
+    # First live payment locks today's price (early-bird while seats remain). Two
+    # students claiming the last seat in the same instant could both get it; at
+    # this volume that's an acceptable edge, and the team sees it in /admin.
+    plan = doc["fee_plan"] if locked else await _current_plan()
+    if programme.summarize_payments(doc.get("payments"), plan)["payment_status"] == "verified":
+        raise HTTPException(409, "Your fee is fully paid — your seat is confirmed.")
+
+    ref_rx = {"$regex": f"^{re.escape(body.reference)}$", "$options": "i"}
+    clash = await db.programme_applications.find_one({"payments.reference": ref_rx}, {"_id": 0, "id": 1, "google_sub": 1})
+    if clash:
+        if clash.get("google_sub") == claims["sub"]:
+            raise HTTPException(409, "You've already submitted this transaction ID.")
+        logger.warning("Transaction %s claimed by %s but already on application %s", body.reference, claims["email"], clash["id"])
+        raise HTTPException(409, "This transaction ID has already been submitted. If it's yours, please contact us.")
+
+    txn = {
+        "id": str(uuid.uuid4()),
+        "reference": body.reference,
+        "amount_reported": round(body.amount, 2),
+        "amount_verified": None,
+        "status": "reported",
+        "reported_at": datetime.now(timezone.utc).isoformat(),
+        "verified_at": None,
+        "verified_by": None,
+        "note": None,
+    }
+    doc = await _save_payments(doc["id"], (doc.get("payments") or []) + [txn], plan)
+    if settings.email_enabled:
+        background.add_task(
+            send_email,
+            settings.owner_email,
+            f"Payment reported: {doc['full_name']} — ₹{txn['amount_reported']:,.2f} — {txn['reference']}",
+            programme.owner_payment_html(doc, txn),
+            doc["email"],
+        )
+    return {"ok": True, "application": programme.public_application(doc, plan)}
+
+
+# ---- Admin dashboard ----
+
+@api_router.post("/admin/session")
+async def admin_session(body: CredentialIn, request: Request):
+    """Exchange a Google sign-in for an admin session — only for ADMIN_EMAILS accounts."""
+    if rate_limit_exceeded(f"admin:{client_ip(request)}", PROGRAMME_RATE_LIMIT):
+        raise HTTPException(429, "Too many requests. Please try again in a minute.")
+    if not settings.admin_token or not settings.admin_emails:
+        raise HTTPException(503, "Admin sign-in is not configured on this deployment.")
+    claims = await google_claims(body.credential)
+    email = claims["email"].lower()
+    if email not in settings.admin_emails:
+        logger.warning("Admin sign-in refused for %s", email)
+        raise HTTPException(403, f"{email} doesn't have admin access.")
+    session = programme.issue_admin_session(email, settings.admin_token)
+    return {**session, "name": claims.get("name") or "", "picture": claims.get("picture") or ""}
+
+
+@api_router.get("/admin/me")
+async def admin_me(who: str = Depends(require_admin)):
+    return {"email": who}
+
+
+def _application_query(
+    q: Optional[str], status: Optional[str] = None, payment_status: Optional[str] = None
+) -> dict:
+    clauses = []
+    if q:
+        rx = {"$regex": re.escape(q), "$options": "i"}
+        clauses.append(
+            {"$or": [{k: rx} for k in ("full_name", "email", "phone", "college", "branch", "city", "payments.reference")]}
+        )
+    if status:
+        clauses.append({"status": status})
+    if payment_status:
+        # Records created before payment tracking have no field — they're unpaid.
+        clauses.append(
+            {"payment_status": {"$in": [None, "unpaid"]}} if payment_status == "unpaid" else {"payment_status": payment_status}
+        )
+    return {"$and": clauses} if clauses else {}
+
+
+@api_router.get("/programme/stats", dependencies=[Depends(require_admin)])
+async def programme_stats():
+    """Headline numbers for the admin dashboard."""
+    col = db.programme_applications
+    since = (datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)).isoformat()
+
+    async def group(field: str) -> dict:
+        rows = await col.aggregate([{"$group": {"_id": f"${field}", "n": {"$sum": 1}}}]).to_list(50)
+        # Missing values (records older than the field) count as the default.
+        blank = "unpaid" if field == "payment_status" else "—"
+        out: dict = {}
+        for r in rows:
+            key = r["_id"] or blank
+            out[key] = out.get(key, 0) + r["n"]
+        return out
+
+    sums = await col.aggregate([
+        {"$match": {"status": {"$ne": "revoked"}}},
+        {"$group": {"_id": None, "paid": {"$sum": {"$ifNull": ["$amount_paid", 0]}},
+                    "pending": {"$sum": {"$ifNull": ["$amount_pending", 0]}}}},
+    ]).to_list(1)
+    return {
+        "total": await col.count_documents({}),
+        "today": await col.count_documents({"created_at": {"$gte": since}}),
+        "by_status": await group("status"),
+        "by_payment": await group("payment_status"),
+        "by_year": await group("year_of_study"),
+        "by_python": await group("python_level"),
+        "seats_paid": await _seats_paid(),
+        "early_bird_claimed": await _early_bird_claimed(),
+        "early_bird_seats": programme.EARLY_BIRD_SEATS,
+        "collected": round(sums[0]["paid"], 2) if sums else 0,
+        "pending_amount": round(sums[0]["pending"], 2) if sums else 0,
+        "fee": programme.fee_breakdown(await _current_plan()),
+    }
+
+
+@api_router.post("/programme/applications/{app_id}/update")
+async def update_programme_application(app_id: str, body: AdminUpdate, who: str = Depends(require_admin)):
+    """Team updates: admission status (incl. revoking a seat) and notes."""
+    doc = await db.programme_applications.find_one({"id": app_id}, {"_id": 0})
+    if not doc:
+        raise HTTPException(404, "Application not found.")
+    changes = {k: v for k, v in body.model_dump().items() if v is not None}
+    if not changes:
+        raise HTTPException(400, "Nothing to update.")
+    now = datetime.now(timezone.utc).isoformat()
+    if changes.get("status") == "revoked" and doc.get("status") != "revoked":
+        changes["revoked_at"] = now
+        changes["revoked_by"] = who
+    changes["updated_at"] = now
+    await db.programme_applications.update_one({"id": app_id}, {"$set": changes})
+    doc = await db.programme_applications.find_one({"id": app_id}, {"_id": 0, "google_sub": 0})
+    logger.info("Application %s updated by %s: %s", app_id, who, sorted(changes))
+    return {"ok": True, "application": doc}
+
+
+@api_router.post("/programme/applications/{app_id}/payments/{txn_id}")
+async def review_programme_payment(
+    app_id: str, txn_id: str, body: TxnUpdate, background: BackgroundTasks, who: str = Depends(require_admin)
+):
+    """Verify (with the amount actually received) or reject one reported transaction."""
+    doc = await db.programme_applications.find_one({"id": app_id}, {"_id": 0})
+    if not doc:
+        raise HTTPException(404, "Application not found.")
+    payments = doc.get("payments") or []
+    txn = next((p for p in payments if p.get("id") == txn_id), None)
+    if not txn:
+        raise HTTPException(404, "Transaction not found.")
+
+    plan = doc.get("fee_plan") or await _current_plan()
+    was_paid = programme.summarize_payments(payments, plan)["payment_status"] == "verified"
+    now = datetime.now(timezone.utc).isoformat()
+    txn.update({
+        "status": body.status,
+        "amount_verified": round(body.amount if body.amount is not None else txn["amount_reported"], 2)
+        if body.status == "verified" else None,
+        "verified_at": now,
+        "verified_by": who,
+        "note": body.note if body.note is not None else txn.get("note"),
+    })
+    now_paid = programme.summarize_payments(payments, plan)["payment_status"] == "verified"
+    extra = {}
+    # Paying in full confirms the seat (unless the team has revoked it).
+    if now_paid and not was_paid and doc.get("status") not in ("revoked", "confirmed"):
+        extra["status"] = "confirmed"
+    doc = await _save_payments(app_id, payments, plan, extra)
+    doc.pop("google_sub", None)
+
+    if now_paid and not was_paid and settings.email_enabled and doc.get("status") != "revoked":
+        background.add_task(
+            send_email,
+            doc["email"],
+            "Seat confirmed — Complete AI Engineering Programme",
+            programme.student_payment_verified_html(doc),
+            settings.owner_email,
+        )
+    logger.info("Transaction %s on %s marked %s by %s", txn["reference"], app_id, body.status, who)
+    return {"ok": True, "application": doc}
+
+
+async def _transactions(q: Optional[str], status: Optional[str], limit: int) -> list:
+    pipeline: list = [{"$unwind": "$payments"}]
+    match: dict = {}
+    if status:
+        match["payments.status"] = status
+    if q:
+        rx = {"$regex": re.escape(q), "$options": "i"}
+        match["$or"] = [{"payments.reference": rx}, {"full_name": rx}, {"email": rx}, {"phone": rx}, {"college": rx}]
+    if match:
+        pipeline.append({"$match": match})
+    pipeline += [
+        {"$sort": {"payments.reported_at": -1}},
+        {"$limit": limit},
+        {"$project": {
+            "_id": 0, "application_id": "$id", "full_name": 1, "email": 1, "phone": 1, "college": 1,
+            "status": 1, "payment_status": 1, "amount_paid": 1, "balance_due": 1, "txn": "$payments",
+        }},
+    ]
+    return await db.programme_applications.aggregate(pipeline).to_list(limit)
+
+
+@api_router.get("/programme/transactions", dependencies=[Depends(require_admin)])
+async def list_programme_transactions(
+    q: Optional[str] = Query(default=None, max_length=120),
+    status: Optional[str] = Query(default=None, max_length=20),
+    limit: int = Query(default=500, ge=1, le=2000),
+):
+    """Every reported Razorpay transaction with the student beside it — for reconciliation."""
+    return {"items": await _transactions(q, status, limit)}
+
+
+@api_router.get("/programme/transactions.csv", dependencies=[Depends(require_admin)])
+async def export_programme_transactions():
+    rows = await _transactions(None, None, 100_000)
+    stamp = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M")
+    return Response(
+        programme.transactions_csv(rows),
+        media_type="text/csv; charset=utf-8",
+        headers={"Content-Disposition": f'attachment; filename="programme-transactions-{stamp}.csv"'},
+    )
+
+
+@api_router.get("/programme/applications", dependencies=[Depends(require_admin)])
+async def list_programme_applications(
+    q: Optional[str] = Query(default=None, max_length=120),
+    status: Optional[str] = Query(default=None, max_length=40),
+    payment_status: Optional[str] = Query(default=None, max_length=40),
+    limit: int = Query(default=100, ge=1, le=500),
+    skip: int = Query(default=0, ge=0),
+):
+    """Student applications — personal data, admin token required."""
+    query = _application_query(q, status, payment_status)
+    total = await db.programme_applications.count_documents(query)
+    items = (
+        await db.programme_applications.find(query, {"_id": 0, "google_sub": 0})
+        .sort("created_at", -1)
+        .skip(skip)
+        .limit(limit)
+        .to_list(limit)
+    )
+    return {"total": total, "limit": limit, "skip": skip, "items": items}
+
+
+@api_router.get("/programme/applications.csv", dependencies=[Depends(require_admin)])
+async def export_programme_applications():
+    """All applications as a spreadsheet-ready CSV — admin token required."""
+    docs = (
+        await db.programme_applications.find({}, {"_id": 0, "google_sub": 0})
+        .sort("created_at", -1)
+        .to_list(None)
+    )
+    stamp = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M")
+    return Response(
+        programme.applications_csv(docs),
+        media_type="text/csv; charset=utf-8",
+        headers={"Content-Disposition": f'attachment; filename="programme-applications-{stamp}.csv"'},
+    )
+
+
+# --------------------------------------------------------------------------------------
 # Startup / seeding
 # --------------------------------------------------------------------------------------
 
@@ -417,6 +881,10 @@ async def ensure_indexes():
     await db.posts.create_index([("date", -1)])
     await db.enquiries.create_index([("created_at", -1)])
     await db.enquiries.create_index("email")
+    await db.programme_applications.create_index("google_sub", unique=True)
+    await db.programme_applications.create_index([("created_at", -1)])
+    await db.programme_applications.create_index("email")
+    await db.programme_applications.create_index("payments.reference")
 
 
 async def seed_database():
@@ -482,6 +950,8 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["GET", "POST", "OPTIONS"],
     allow_headers=["Authorization", "Content-Type", "X-Admin-Token"],
+    # Lets the admin page read the CSV export's filename when the API is cross-origin.
+    expose_headers=["Content-Disposition"],
     max_age=600,
 )
 
@@ -498,8 +968,8 @@ async def security_headers(request: Request, call_next):
         response.headers.setdefault(
             "Strict-Transport-Security", "max-age=31536000; includeSubDomains"
         )
-    # Stored enquiries must never sit in a shared cache.
-    if request.url.path.startswith("/api/enquiries"):
+    # Stored enquiries and student applications must never sit in a shared cache.
+    if request.url.path.startswith(("/api/enquiries", "/api/programme/", "/api/admin/")):
         response.headers["Cache-Control"] = "no-store"
     return response
 

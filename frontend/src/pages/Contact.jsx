@@ -8,6 +8,7 @@ import { LineReveal, Reveal } from "@/components/motion/Reveal";
 import { useSearchParams } from "react-router-dom";
 import { submitContact, useServices } from "@/lib/api";
 import { SITE } from "@/lib/site";
+import { PROGRAMME_INTEREST } from "@/lib/programme";
 
 const schema = z.object({
   name: z.string().min(2, "Please enter your name"),
@@ -21,8 +22,9 @@ const schema = z.object({
   website: z.string().max(0).optional(),
 });
 
-// Offered alongside the capabilities; ?interest=growth pre-selects it.
+// Offered alongside the capabilities; ?interest=<key> pre-selects one.
 const GROWTH_INTEREST = "Growth ecosystem (marketing, voice agent, sales)";
+const INTEREST_PRESETS = { growth: GROWTH_INTEREST, "ai-engineering": PROGRAMME_INTEREST };
 
 const BUDGETS = ["Under $10k", "$10k – $25k", "$25k – $75k", "$75k+", "Not sure yet"];
 
@@ -37,11 +39,15 @@ export default function Contact() {
     register,
     handleSubmit,
     reset,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm({
     resolver: zodResolver(schema),
-    defaultValues: { website: "", service_interest: params.get("interest") === "growth" ? GROWTH_INTEREST : "" },
+    defaultValues: { website: "", service_interest: INTEREST_PRESETS[params.get("interest")] || "" },
   });
+
+  // Students applying to the programme have no project budget to declare.
+  const isProgramme = watch("service_interest") === PROGRAMME_INTEREST;
 
   const onSubmit = async (values) => {
     try {
@@ -99,12 +105,12 @@ export default function Contact() {
                   {errors.name && <p className="mt-2 text-xs text-red-400" data-testid="contact-name-error">{errors.name.message}</p>}
                 </div>
                 <div>
-                  <label htmlFor="company" className={labelCls}>Company</label>
-                  <input id="company" data-testid="contact-company-input" className={inputCls} placeholder="Company name" {...register("company")} />
+                  <label htmlFor="company" className={labelCls}>{isProgramme ? "College" : "Company"}</label>
+                  <input id="company" data-testid="contact-company-input" className={inputCls} placeholder={isProgramme ? "College / university" : "Company name"} {...register("company")} />
                 </div>
                 <div>
-                  <label htmlFor="role" className={labelCls}>Role</label>
-                  <input id="role" data-testid="contact-role-input" className={inputCls} placeholder="e.g. CEO, Operations Head" {...register("role")} />
+                  <label htmlFor="role" className={labelCls}>{isProgramme ? "Year & branch" : "Role"}</label>
+                  <input id="role" data-testid="contact-role-input" className={inputCls} placeholder={isProgramme ? "e.g. BTech 3rd year, CSE" : "e.g. CEO, Operations Head"} {...register("role")} />
                 </div>
                 <div>
                   <label htmlFor="email" className={labelCls}>Email *</label>
@@ -123,9 +129,11 @@ export default function Contact() {
                       <option key={s.slug} value={s.title}>{s.title}</option>
                     ))}
                     <option value={GROWTH_INTEREST}>{GROWTH_INTEREST}</option>
+                    <option value={PROGRAMME_INTEREST}>{PROGRAMME_INTEREST}</option>
                     <option value="General enquiry">General enquiry</option>
                   </select>
                 </div>
+                {!isProgramme && (
                 <div className="sm:col-span-2">
                   <label className={labelCls}>Budget range</label>
                   <div className="flex flex-wrap gap-2 pt-1" data-testid="contact-budget-group">
@@ -139,6 +147,7 @@ export default function Contact() {
                     ))}
                   </div>
                 </div>
+                )}
                 <div className="sm:col-span-2">
                   <label htmlFor="message" className={labelCls}>Message *</label>
                   <textarea
@@ -146,7 +155,11 @@ export default function Contact() {
                     rows={5}
                     data-testid="contact-message-input"
                     className={`${inputCls} resize-none border border-line p-4`}
-                    placeholder="What problem are you trying to solve? What does success look like?"
+                    placeholder={
+                      isProgramme
+                        ? "Tell us about your Python / programming experience and what you want to build."
+                        : "What problem are you trying to solve? What does success look like?"
+                    }
                     {...register("message")}
                   />
                   {errors.message && <p className="mt-2 text-xs text-red-400" data-testid="contact-message-error">{errors.message.message}</p>}

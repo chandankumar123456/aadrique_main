@@ -1,0 +1,51 @@
+/* AADRIQUE print brand — shared by the poster and flyer. */
+@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap");
+
+:root {
+  --ink: #0a0a0a;
+  --bg: #080808;
+  --cream: #f4eedd;
+  --cream-dim: rgba(244, 238, 221, 0.62);
+  --cream-faint: rgba(244, 238, 221, 0.16);
+  --orange: #fa942c;
+  --orange-deep: #e57d12;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { background: var(--bg); }
+body {
+  font-family: "Plus Jakarta Sans", sans-serif;
+  color: var(--cream);
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+.grotesk { font-family: "Space Grotesk", sans-serif; }
+.label {
+  font-family: "Space Grotesk", sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.24em;
+  font-weight: 500;
+}
+.outline { color: transparent; -webkit-text-stroke: var(--stroke, 0.35mm) var(--cream); }
+.outline-orange { color: transparent; -webkit-text-stroke: var(--stroke, 0.35mm) var(--orange); }
+.orange { color: var(--orange); }
+.dim { color: var(--cream-dim); }
+
+.hatch {
+  background-image: repeating-linear-gradient(60deg, var(--hatch, rgba(250, 148, 44, 0.42)) 0 0.25mm, transparent 0.25mm 3.2mm);
+}
+.tick { display: inline-block; width: 0.3mm; height: 1em; background: var(--orange); transform: rotate(30deg); }
+
+.wordmark { display: flex; align-items: center; gap: 2mm; font-family: "Space Grotesk"; font-weight: 600; letter-spacing: 0.38em; color: #fff; }
+.wordmark img { height: 1.05em; width: auto; }
+
+.pill {
+  display: inline-flex; align-items: center; gap: 1.6mm;
+  background: var(--orange); color: var(--ink);
+  font-family: "Space Grotesk"; font-weight: 600; text-transform: uppercase; letter-spacing: 0.2em;
+}
+.pill .dot { width: 1.3mm; height: 1.3mm; border-radius: 50%; background: var(--ink); }
+
+.qr-card { background: var(--cream); display: grid; place-items: center; }
+.qr-card svg { display: block; width: 100%; height: 100%; }

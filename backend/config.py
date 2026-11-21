@@ -76,8 +76,20 @@ class Settings:
     email_from_name: str = field(default_factory=lambda: _env("EMAIL_FROM_NAME", "AADRIQUE"))
     owner_email: str = field(default_factory=lambda: _env("OWNER_EMAIL"))
 
+    # --- Google Sign-In (programme applications) ---
+    # OAuth 2.0 Web client ID from Google Cloud Console. Public by design — the
+    # browser needs it too, and the API serves it from /api/programme/config.
+    google_client_id: str = field(default_factory=lambda: _env("GOOGLE_CLIENT_ID"))
+
+    # Razorpay payment link students pay the programme fee through (until API keys).
+    razorpay_payment_link: str = field(default_factory=lambda: _env("RAZORPAY_PAYMENT_LINK"))
+
     # --- Admin API ---
     admin_token: str = field(default_factory=lambda: _env("ADMIN_TOKEN"))
+    # Google accounts allowed into the admin dashboard (Sign in with Google).
+    admin_emails: List[str] = field(
+        default_factory=lambda: [e.lower() for e in _env_list("ADMIN_EMAILS")]
+    )
 
     # --- Networking / limits ---
     trust_proxy: bool = field(default_factory=lambda: _env_bool("TRUST_PROXY", False))
@@ -125,6 +137,12 @@ class Settings:
                 )
             elif len(self.admin_token) < 24:
                 fatal.append("ADMIN_TOKEN must be at least 24 characters.")
+            if not self.google_client_id:
+                warnings.append(
+                    "GOOGLE_CLIENT_ID unset — programme applications (Sign in with Google) are disabled."
+                )
+            if not self.admin_emails:
+                warnings.append("ADMIN_EMAILS unset — nobody can sign in to the admin dashboard with Google.")
             if not self.email_enabled:
                 warnings.append(
                     "Email is disabled (RESEND_API_KEY / OWNER_EMAIL / EMAIL_FROM_ADDRESS unset) — "
@@ -139,6 +157,8 @@ class Settings:
                 )
             if not self.email_enabled:
                 warnings.append("Email is disabled — enquiries are stored only.")
+            if not self.google_client_id:
+                warnings.append("GOOGLE_CLIENT_ID unset — programme applications are disabled.")
 
         if fatal:
             raise ConfigError(

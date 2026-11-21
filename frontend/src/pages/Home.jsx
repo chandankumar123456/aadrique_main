@@ -7,6 +7,7 @@ import { LineReveal, Reveal, Stagger, StaggerItem } from "@/components/motion/Re
 import { Marquee } from "@/components/Marquee";
 import { CTABand } from "@/components/CTABand";
 import { ProductCard } from "@/components/ProductCard";
+import { ProgrammeBanner } from "@/components/programme/ProgrammeBanner";
 import { useServices, useIndustries, useCaseStudies, useProducts, usePosts, useGrowth } from "@/lib/api";
 import { serviceIcon } from "@/lib/icons";
 import { SITE, EASE } from "@/lib/site";
@@ -156,6 +157,9 @@ export default function Home() {
 
       {/* ── Marquee ──────────────────────────────────── */}
       <Marquee items={["Build", "Transform", "Scale", "AADRIQUE"]} />
+
+      {/* ── AI Engineering Programme ─────────────────── */}
+      <ProgrammeBanner />
 
       {/* ── Products ─────────────────────────────────── */}
       {products.length > 0 && (

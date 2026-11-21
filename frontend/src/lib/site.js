@@ -12,6 +12,7 @@ export const SITE = {
 };
 
 export const NAV_LINKS = [
+  { label: "AI Programme", to: "/ai-engineering" },
   { label: "Capabilities", to: "/capabilities" },
   { label: "Products", to: "/products" },
   { label: "Growth", to: "/growth" },

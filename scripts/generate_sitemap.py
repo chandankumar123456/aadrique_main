@@ -22,7 +22,9 @@ from seed_data import CASE_STUDIES, INDUSTRIES, POSTS, PRODUCTS, SERVICES  # noq
 PUBLIC = REPO / "frontend" / "public"
 
 STATIC_ROUTES = [
-    ("/", "1.0", "weekly"),
+    ("/ai-engineering", "1.0", "weekly"),
+    ("/ai-engineering/apply", "0.9", "weekly"),
+    ("/home", "0.9", "weekly"),
     ("/capabilities", "0.9", "monthly"),
     ("/industries", "0.9", "monthly"),
     ("/work", "0.8", "monthly"),
@@ -34,6 +36,7 @@ STATIC_ROUTES = [
     ("/contact", "0.9", "monthly"),
     ("/privacy-policy", "0.3", "yearly"),
     ("/terms", "0.3", "yearly"),
+    ("/refund-policy", "0.3", "yearly"),
 ]
 
 
@@ -88,6 +91,8 @@ def render_robots(base_url: str) -> str:
         "\n"
         "# The API serves JSON only — nothing to index, and /api/enquiries is private.\n"
         "Disallow: /api/\n"
+        "# Internal admin screens.\n"
+        "Disallow: /admin\n"
         "\n"
         f"Sitemap: {base_url}/sitemap.xml\n"
     )

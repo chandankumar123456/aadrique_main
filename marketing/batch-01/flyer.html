@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>AADRIQUE — Complete AI Engineering Programme — Flyer (A5, double-sided)</title>
+<link rel="stylesheet" href="brand.css" />
+<style>
+  @page { size: 148mm 210mm; margin: 0; }
+  .page {
+    position: relative; width: 148mm; height: 210mm; overflow: hidden;
+    background: var(--bg); padding: 9mm 9.5mm 7.5mm;
+    display: flex; flex-direction: column;
+    page-break-after: always; break-after: page;
+  }
+  .hatch-band { position: absolute; right: 0; top: 0; width: 15mm; height: 100%; opacity: 0.3; --hatch: rgba(250, 148, 44, 0.45); }
+
+  .top { position: relative; display: flex; justify-content: space-between; align-items: center; }
+  .top .wordmark { font-size: 4mm; }
+  .top .pill { font-size: 1.9mm; padding: 1.3mm 2.2mm; letter-spacing: 0.18em; }
+  .rule { position: relative; height: 0.2mm; background: var(--cream-faint); margin: 4.5mm 0 5mm; }
+
+  /* ── Front ── */
+  .kicker { position: relative; font-size: 2.1mm; color: var(--orange); display: flex; gap: 2mm; align-items: center; }
+  h1 { position: relative; margin-top: 3.5mm; font-family: "Space Grotesk"; font-weight: 600; font-size: 13.2mm; line-height: 0.95; letter-spacing: -0.035em; color: #fff; }
+  h1 .outline { --stroke: 0.32mm; }
+  .sub { position: relative; margin-top: 4.5mm; font-size: 3.3mm; line-height: 1.4; max-width: 112mm; }
+  .sub b { color: var(--orange); font-weight: 600; }
+
+  .facts { position: relative; margin-top: 5mm; display: grid; grid-template-columns: 1.35fr 1fr 1fr; border: 0.25mm solid var(--orange); }
+  .facts > div { padding: 2.4mm 3mm; border-right: 0.25mm solid rgba(250, 148, 44, 0.5); }
+  .facts > div:last-child { border-right: 0; }
+  .facts .k { font-size: 1.7mm; color: var(--cream-dim); }
+  .facts .v { margin-top: 0.8mm; font-family: "Space Grotesk"; font-weight: 600; font-size: 3.9mm; color: #fff; }
+  .facts .v.o { color: var(--orange); }
+
+  .feat { position: relative; margin-top: 5mm; display: grid; grid-template-columns: 1fr 1fr; border-top: 0.2mm solid var(--cream-faint); border-left: 0.2mm solid var(--cream-faint); }
+  .feat > div { padding: 2.5mm 3mm 2.7mm; border-right: 0.2mm solid var(--cream-faint); border-bottom: 0.2mm solid var(--cream-faint); background: rgba(8, 8, 8, 0.86); }
+  .feat .n { font-size: 1.7mm; color: var(--orange); }
+  .feat .h { margin-top: 1.2mm; font-family: "Space Grotesk"; font-weight: 600; font-size: 3.15mm; line-height: 1.15; color: #fff; }
+  .feat .d { margin-top: 0.8mm; font-size: 2.15mm; line-height: 1.4; color: var(--cream-dim); }
+
+  .ticket { position: relative; margin-top: auto; display: grid; grid-template-columns: 1fr 0 61mm; background: var(--orange); color: var(--ink); }
+  .ticket .notch { position: absolute; width: 5mm; height: 5mm; border-radius: 50%; background: var(--bg); left: calc(100% - 61mm - 2.5mm); }
+  .ticket .notch.a { top: -2.5mm; } .ticket .notch.b { bottom: -2.5mm; }
+  .ticket .perf { border-left: 0.35mm dashed rgba(10, 10, 10, 0.55); margin: 3.5mm 0; }
+  .fee { padding: 4.6mm 5mm; display: flex; flex-direction: column; }
+  .fee .k { font-size: 1.75mm; color: rgba(10, 10, 10, 0.7); }
+  .fee .price { margin-top: 1.2mm; font-family: "Space Grotesk"; font-weight: 700; font-size: 12.6mm; line-height: 0.9; letter-spacing: -0.04em; }
+  .fee .note { margin-top: 2.2mm; font-size: 2.2mm; font-weight: 600; line-height: 1.35; }
+  .fee .reg { margin-top: 0.8mm; font-size: 2mm; line-height: 1.35; color: rgba(10, 10, 10, 0.72); }
+  .scan { padding: 4.2mm 4.5mm; display: flex; gap: 3.4mm; align-items: center; }
+  /* padding ≥ 4 QR modules (quiet zone) */
+  .scan .qr-card { width: 28mm; height: 28mm; padding: 2.6mm; flex: none; }
+  .scan .k { font-size: 1.7mm; }
+  .scan .h { margin-top: 1.2mm; font-family: "Space Grotesk"; font-weight: 700; font-size: 4.6mm; line-height: 1.02; letter-spacing: -0.02em; }
+  .scan .url { margin-top: 2mm; font-family: "Space Grotesk"; font-weight: 600; font-size: 1.85mm; white-space: nowrap; }
+
+  .foot { position: relative; margin-top: 3.4mm; display: flex; justify-content: space-between; align-items: flex-end; gap: 6mm; }
+  .foot .contact { font-family: "Space Grotesk"; font-size: 2.3mm; color: #fff; display: flex; gap: 4mm; white-space: nowrap; }
+  .foot .fine { font-size: 1.55mm; line-height: 1.45; color: var(--cream-dim); text-align: right; max-width: 78mm; }
+
+  /* ── Back ── */
+  .back .rule { margin: 3.8mm 0 4.2mm; }
+  .back h2 { position: relative; font-family: "Space Grotesk"; font-weight: 600; font-size: 7.4mm; line-height: 0.98; letter-spacing: -0.03em; color: #fff; }
+  .back h2 .outline { --stroke: 0.28mm; }
+  .back .lead { position: relative; margin-top: 2.2mm; font-size: 2.3mm; line-height: 1.45; color: var(--cream-dim); max-width: 118mm; }
+
+  .months { position: relative; margin-top: 3.6mm; display: grid; grid-template-columns: 1fr 1fr; gap: 0; border-top: 0.2mm solid var(--cream-faint); border-left: 0.2mm solid var(--cream-faint); }
+  .month { padding: 2.4mm 3.2mm 2.5mm; border-right: 0.2mm solid var(--cream-faint); border-bottom: 0.2mm solid var(--cream-faint); background: rgba(8, 8, 8, 0.88); }
+  .month .bar { height: 0.7mm; width: 9mm; background: var(--orange); margin-bottom: 1.6mm; }
+  .month:nth-child(2) .bar { background: #f6b46c; } .month:nth-child(3) .bar { background: #fbd2a5; } .month:nth-child(4) .bar { background: var(--cream); }
+  .month .n { font-size: 1.65mm; color: var(--orange); }
+  .month .t { margin-top: 0.8mm; font-family: "Space Grotesk"; font-weight: 600; font-size: 3mm; line-height: 1.15; color: #fff; }
+  .month ol { margin-top: 1.4mm; list-style: none; }
+  .month li { display: flex; gap: 1.6mm; font-size: 2mm; line-height: 1.35; color: var(--cream); padding: 0.25mm 0; }
+  .month li span { font-family: "Space Grotesk"; color: var(--orange); min-width: 3.6mm; }
+  .month .out { margin-top: 1.2mm; padding-top: 1.2mm; border-top: 0.2mm solid var(--cream-faint); font-size: 1.85mm; line-height: 1.4; color: var(--cream-dim); }
+
+  .row2 { position: relative; margin-top: 3.6mm; display: grid; grid-template-columns: 1fr 1fr; gap: 6mm; }
+  .sec-label { font-size: 1.75mm; color: var(--orange); }
+  .projects { margin-top: 1.8mm; list-style: none; border-top: 0.2mm solid var(--cream-faint); }
+  .projects li { display: flex; gap: 2mm; padding: 0.85mm 0; border-bottom: 0.2mm solid var(--cream-faint); font-family: "Space Grotesk"; font-size: 2.45mm; color: #fff; }
+  .projects li span { color: var(--orange); font-size: 1.9mm; padding-top: 0.3mm; }
+  .rhythm { margin-top: 1.8mm; border-top: 0.2mm solid var(--cream-faint); }
+  .rhythm div { display: grid; grid-template-columns: 13mm 1fr; gap: 2mm; padding: 0.85mm 0; border-bottom: 0.2mm solid var(--cream-faint); font-size: 2.2mm; line-height: 1.35; }
+  .rhythm b { font-family: "Space Grotesk"; font-weight: 600; color: #fff; }
+  .rhythm span { color: var(--cream-dim); }
+
+  .join { position: relative; margin-top: auto; display: grid; grid-template-columns: 1fr 28mm; gap: 5mm; align-items: center; background: #121212; border: 0.25mm solid var(--orange); padding: 3mm 4mm; }
+  .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3mm; margin-top: 1.8mm; }
+  .steps div { font-size: 2.05mm; line-height: 1.4; color: var(--cream-dim); }
+  .steps b { display: flex; align-items: center; gap: 1.4mm; font-family: "Space Grotesk"; font-size: 2.6mm; color: #fff; margin-bottom: 0.6mm; }
+  .steps b i { font-style: normal; display: inline-grid; place-items: center; width: 3.6mm; height: 3.6mm; border: 0.2mm solid var(--orange); color: var(--orange); font-size: 1.8mm; }
+  .join .who { margin-top: 1.8mm; font-size: 2.05mm; color: var(--cream); }
+  .join .who b { color: var(--orange); font-weight: 600; }
+  .join .qr-card { width: 28mm; height: 28mm; padding: 2.6mm; }
+  .join .qr-cap { margin-top: 1.2mm; font-size: 1.6mm; text-align: center; color: var(--orange); }
+</style>
+</head>
+<body>
+
+<!-- ═════════════ FRONT ═════════════ -->
+<div class="page">
+  <div class="hatch hatch-band"></div>
+  <div class="top">
+    <div class="wordmark">AADRIQUE <img src="monogram.webp" alt="" /></div>
+    <div class="pill"><span class="dot"></span>Admissions open · Batch 01</div>
+  </div>
+  <div class="rule"></div>
+
+  <div class="kicker label"><span class="tick"></span>Complete AI Engineering Programme</div>
+  <h1>Don't just learn AI.<br/><span class="outline">Learn to build</span><br/><span class="outline">with it.</span></h1>
+  <p class="sub">A four-month, <b>live</b> and practical programme for <b>BTech 2nd- &amp; 3rd-year</b> students — Python, machine learning, deep learning, LLMs, RAG, AI agents and deployment, taught with industry mentors.</p>
+
+  <div class="facts">
+    <div><p class="k label">Classes begin</p><p class="v o">15 Dec 2026</p></div>
+    <div><p class="k label">Duration</p><p class="v">16 weeks</p></div>
+    <div><p class="k label">Live teaching</p><p class="v">~80 hrs</p></div>
+  </div>
+
+  <div class="feat">
+    <div><p class="n label">01</p><p class="h">Live classes every weekday</p><p class="d">One focused hour — every session recorded.</p></div>
+    <div><p class="n label">02</p><p class="h">1:1 mentor sessions</p><p class="d">Every Saturday &amp; Sunday.</p></div>
+    <div><p class="n label">03</p><p class="h">5 portfolio projects</p><p class="d">Including a deployed AI capstone.</p></div>
+    <div><p class="n label">04</p><p class="h">Certificate in your name</p><p class="d">On meeting completion requirements.</p></div>
+    <div><p class="n label">05</p><p class="h">Industry mentors</p><p class="d">Plus a network of 20+ partner companies.</p></div>
+    <div><p class="n label">06</p><p class="h">Paid internship pathway*</p><p class="d">For selected top performers.</p></div>
+  </div>
+
+  <div class="ticket">
+    <span class="notch a"></span><span class="notch b"></span>
+    <div class="fee">
+      <p class="k label">Early-bird · first 20 admissions</p>
+      <p class="price">₹14,999</p>
+      <p class="note">₹17,999 once the early-bird seats are taken.</p>
+      <p class="reg">UPI, card or net banking · non-refundable</p>
+    </div>
+    <div class="perf"></div>
+    <div class="scan">
+      <div class="qr-card"><img src="qr-flyer.svg" alt="QR code to aadrique.in/ai-engineering" style="width:100%;height:100%;display:block" /></div>
+      <div>
+        <p class="k label">Scan to</p>
+        <p class="h">Apply &amp; pay online</p>
+        <p class="url">aadrique.in/ai-engineering</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="foot">
+    <div class="contact"><span>info@aadrique.in</span><span>+91 96528 86208</span></div>
+    <p class="fine">*Paid internships are competitive and not guaranteed. Certificate subject to completion requirements. Fees are non-refundable.</p>
+  </div>
+</div>
+
+<!-- ═════════════ BACK ═════════════ -->
+<div class="page back">
+  <div class="hatch hatch-band"></div>
+  <div class="top">
+    <div class="wordmark">AADRIQUE <img src="monogram.webp" alt="" /></div>
+    <div class="label" style="font-size:1.9mm;color:var(--orange)">Batch 01 · starts 15 Dec 2026</div>
+  </div>
+  <div class="rule"></div>
+
+  <h2>Python to production,<br/><span class="outline">in 16 weeks.</span></h2>
+  <p class="lead">One live hour every weekday, one-to-one mentor sessions every weekend, and every class recorded. You practise, get feedback and finish with projects you can open, explain and demonstrate.</p>
+
+  <div class="months">
+    <div class="month">
+      <div class="bar"></div><p class="n label">Month 01 · Weeks 1–4</p>
+      <p class="t">Programming, Data &amp; ML Foundations</p>
+      <ol>
+        <li><span>01</span>Python programming fundamentals</li>
+        <li><span>02</span>Intermediate Python, Git &amp; APIs</li>
+        <li><span>03</span>Data science &amp; maths for AI</li>
+        <li><span>04</span>Introduction to machine learning</li>
+      </ol>
+      <p class="out">Outcome: build, train and evaluate an ML model.</p>
+    </div>
+    <div class="month">
+      <div class="bar"></div><p class="n label">Month 02 · Weeks 5–8</p>
+      <p class="t">Advanced ML &amp; Deep Learning</p>
+      <ol>
+        <li><span>05</span>Clustering, PCA, boosting &amp; XGBoost</li>
+        <li><span>06</span>Neural network fundamentals</li>
+        <li><span>07</span>Deep learning with PyTorch &amp; CNNs</li>
+        <li><span>08</span>NLP, attention &amp; transformers</li>
+      </ol>
+      <p class="out">Outcome: build and evaluate a deep learning app.</p>
+    </div>
+    <div class="month">
+      <div class="bar"></div><p class="n label">Month 03 · Weeks 9–12</p>
+      <p class="t">Generative AI &amp; LLM Engineering</p>
+      <ol>
+        <li><span>09</span>LLMs, prompting &amp; tool calling</li>
+        <li><span>10</span>Embeddings, vector databases &amp; RAG</li>
+        <li><span>11</span>LangChain, LangGraph &amp; AI agents</li>
+        <li><span>12</span>Open-source models &amp; fine-tuning</li>
+      </ol>
+      <p class="out">Outcome: a RAG app and a tool-using AI agent.</p>
+    </div>
+    <div class="month">
+      <div class="bar"></div><p class="n label">Month 04 · Weeks 13–16</p>
+      <p class="t">Production AI &amp; Deployment</p>
+      <ol>
+        <li><span>13</span>FastAPI, PostgreSQL &amp; AI backends</li>
+        <li><span>14</span>Docker, cloud &amp; CI/CD</li>
+        <li><span>15</span>Testing, evaluation &amp; AI safety</li>
+        <li><span>16</span>System design &amp; capstone demo</li>
+      </ol>
+      <p class="out">Outcome: a deployed, documented AI application.</p>
+    </div>
+  </div>
+
+  <div class="row2">
+    <div>
+      <p class="sec-label label">Five portfolio projects</p>
+      <ol class="projects">
+        <li><span>P01</span>Machine learning prediction system</li>
+        <li><span>P02</span>Computer vision application</li>
+        <li><span>P03</span>Enterprise-style RAG assistant</li>
+        <li><span>P04</span>Agentic AI research assistant</li>
+        <li><span>P05</span>Production AI application</li>
+      </ol>
+    </div>
+    <div>
+      <p class="sec-label label">Your week</p>
+      <div class="rhythm">
+        <div><b>Mon–Fri</b><span>One live, instructor-led hour: concepts, code walkthroughs, live implementation</span></div>
+        <div><b>Sat–Sun</b><span>One-to-one mentor sessions, doubt-clearing and project guidance</span></div>
+        <div><b>Always</b><span>Every class recorded — catch up on anything you miss</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="join">
+    <div>
+      <p class="sec-label label">How to join</p>
+      <div class="steps">
+        <div><b><i>1</i>Scan</b>Open the programme page and tap Apply for Batch 01.</div>
+        <div><b><i>2</i>Apply</b>Sign in with Google and fill a 2-minute form.</div>
+        <div><b><i>3</i>Pay</b>Pay online via Razorpay to confirm your seat.</div>
+      </div>
+      <p class="who">For <b>BTech 2nd- &amp; 3rd-year</b> students · no prior AI needed — Python basics are taught from week 1.</p>
+    </div>
+    <div>
+      <div class="qr-card"><img src="qr-flyer.svg" alt="QR code to aadrique.in/ai-engineering" style="width:100%;height:100%;display:block" /></div>
+      <p class="qr-cap label">Scan to apply</p>
+    </div>
+  </div>
+
+  <div class="foot">
+    <div class="contact"><span>aadrique.in/ai-engineering</span><span>+91 96528 86208</span></div>
+    <p class="fine">AADRIQUE TECH PVT LTD · info@aadrique.in · Fees are non-refundable — aadrique.in/refund-policy</p>
+  </div>
+</div>
+
+</body>
+</html>

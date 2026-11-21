@@ -5,6 +5,8 @@ const COLS = [
   {
     title: "Company",
     links: [
+      { label: "Home", to: "/home" },
+      { label: "AI Engineering Programme", to: "/ai-engineering" },
       { label: "About", to: "/about" },
       { label: "Work", to: "/work" },
       { label: "Insights", to: "/insights" },
@@ -35,6 +37,7 @@ const COLS = [
     links: [
       { label: "Privacy Policy", to: "/privacy-policy" },
       { label: "Terms of Service", to: "/terms" },
+      { label: "Refund Policy", to: "/refund-policy" },
     ],
   },
 ];

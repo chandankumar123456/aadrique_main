@@ -52,3 +52,63 @@ export const useTestimonials = () =>
 
 export const submitContact = (payload) =>
   http.post("/contact", payload).then((r) => r.data);
+
+// ── AI Engineering Programme ────────────────────────────────────────────────
+// `credential` is the Google ID token from Sign in with Google; the API verifies it.
+
+export const useProgrammeConfig = () =>
+  useQuery({ queryKey: ["programme-config"], queryFn: () => get("/programme/config"), staleTime: Infinity });
+
+export const programmeSession = (credential) =>
+  http.post("/programme/session", { credential }).then((r) => r.data);
+
+export const submitProgrammeApplication = (payload) =>
+  http.post("/programme/applications", payload).then((r) => r.data);
+
+const adminHeaders = (token) => ({ headers: { "X-Admin-Token": token } });
+
+export const fetchProgrammeApplications = (token, params = {}) =>
+  http.get("/programme/applications", { ...adminHeaders(token), params }).then((r) => r.data);
+
+export const fetchProgrammeTransactions = (token, params = {}) =>
+  http.get("/programme/transactions", { ...adminHeaders(token), params }).then((r) => r.data);
+
+export const downloadProgrammeApplicationsCsv = (token) => downloadAdminCsv(token, "/programme/applications.csv");
+export const downloadProgrammeTransactionsCsv = (token) => downloadAdminCsv(token, "/programme/transactions.csv");
+
+const downloadAdminCsv = async (token, path) => {
+  const r = await http.get(path, { ...adminHeaders(token), responseType: "blob" });
+  const name = /filename="([^"]+)"/.exec(r.headers["content-disposition"] || "")?.[1] || "export.csv";
+  const url = URL.createObjectURL(r.data);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = name;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+};
+
+/** Readable message from an API error (FastAPI returns a string or a list of field errors). */
+export const apiErrorMessage = (e, fallback = "Something went wrong. Please try again.") => {
+  const detail = e?.response?.data?.detail;
+  if (typeof detail === "string") return detail;
+  if (Array.isArray(detail) && typeof detail[0]?.msg === "string") return detail[0].msg.replace(/^Value error, /, "");
+  return fallback;
+};
+
+export const reportProgrammePayment = (credential, reference, amount) =>
+  http.post("/programme/payment", { credential, reference, amount }).then((r) => r.data);
+
+// ── Admin dashboard (session from Sign in with Google, allow-listed emails) ──
+export const adminSession = (credential) => http.post("/admin/session", { credential }).then((r) => r.data);
+
+export const fetchProgrammeStats = (token) => http.get("/programme/stats", adminHeaders(token)).then((r) => r.data);
+
+export const reviewProgrammePayment = (token, appId, txnId, decision) =>
+  http
+    .post(`/programme/applications/${encodeURIComponent(appId)}/payments/${encodeURIComponent(txnId)}`, decision, adminHeaders(token))
+    .then((r) => r.data);
+
+export const updateProgrammeApplication = (token, id, changes) =>
+  http.post(`/programme/applications/${encodeURIComponent(id)}/update`, changes, adminHeaders(token)).then((r) => r.data);

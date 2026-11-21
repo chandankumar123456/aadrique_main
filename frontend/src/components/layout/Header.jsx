@@ -3,10 +3,13 @@ import { Link, NavLink, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Sun, Moon, Menu, X, ArrowUpRight } from "lucide-react";
 import { NAV_LINKS, EASE, SITE } from "@/lib/site";
+import { PROGRAMME_PATH, PROGRAMME_APPLY, PRIMARY_CTA } from "@/lib/programme";
 
 export const Header = ({ theme, toggleTheme }) => {
   const [open, setOpen] = useState(false);
   const location = useLocation();
+  // On the programme landing page the primary action is applying, not a consultation.
+  const onProgramme = location.pathname === PROGRAMME_PATH;
 
   useEffect(() => setOpen(false), [location.pathname]);
   useEffect(() => {
@@ -22,7 +25,7 @@ export const Header = ({ theme, toggleTheme }) => {
         style={{ backgroundColor: "color-mix(in srgb, var(--bg) 72%, transparent)" }}
       >
         <div className="max-w-7xl mx-auto px-6 lg:px-10 h-16 md:h-[72px] flex items-center justify-between">
-          <Link to="/" data-testid="header-logo-link" className="flex items-center gap-1.5 group">
+          <Link to="/home" data-testid="header-logo-link" className="flex items-center gap-1.5 group">
             <span className="font-grotesk font-semibold tracking-[0.35em] text-inkStrong text-sm md:text-base">
               AADRIQUE
             </span>
@@ -36,14 +39,14 @@ export const Header = ({ theme, toggleTheme }) => {
             />
           </Link>
 
-          <nav className="hidden xl:flex items-center gap-8" aria-label="Primary">
+          <nav className="hidden xl:flex items-center gap-5 2xl:gap-8" aria-label="Primary">
             {NAV_LINKS.map((l) => (
               <NavLink
                 key={l.to}
                 to={l.to}
-                data-testid={`nav-link-${l.label.toLowerCase()}`}
+                data-testid={`nav-link-${l.label.toLowerCase().replace(/\s+/g, "-")}`}
                 className={({ isActive }) =>
-                  `link-underline font-grotesk text-[13px] tracking-[0.08em] uppercase transition-colors duration-300 ${
+                  `link-underline whitespace-nowrap font-grotesk text-[13px] tracking-[0.08em] uppercase transition-colors duration-300 ${
                     isActive ? "text-accentText" : "text-mutedInk hover:text-inkStrong"
                   }`
                 }
@@ -63,11 +66,11 @@ export const Header = ({ theme, toggleTheme }) => {
               {theme === "light" ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
             </button>
             <Link
-              to="/contact"
+              to={onProgramme ? PROGRAMME_APPLY : "/contact"}
               data-testid="header-contact-cta"
-              className="hidden md:inline-flex items-center gap-2 bg-accent text-[#0A0A0A] px-5 py-2.5 font-grotesk font-medium text-sm tracking-wide hover:bg-inkStrong hover:text-bg transition-colors duration-300"
+              className="hidden md:inline-flex shrink-0 whitespace-nowrap items-center gap-2 bg-accent text-[#0A0A0A] px-5 py-2.5 font-grotesk font-medium text-sm tracking-wide hover:bg-inkStrong hover:text-bg transition-colors duration-300"
             >
-              Book a consultation
+              {onProgramme ? PRIMARY_CTA : "Book a consultation"}
               <ArrowUpRight className="w-3.5 h-3.5" />
             </Link>
             <button
@@ -104,7 +107,7 @@ export const Header = ({ theme, toggleTheme }) => {
                 >
                   <NavLink
                     to={l.to}
-                    data-testid={`mobile-nav-link-${l.label.toLowerCase()}`}
+                    data-testid={`mobile-nav-link-${l.label.toLowerCase().replace(/\s+/g, "-")}`}
                     className="flex items-baseline gap-4 py-4 border-b border-line font-grotesk text-3xl font-medium text-inkStrong"
                   >
                     <span className="label-tech text-accentText">0{i + 1}</span>

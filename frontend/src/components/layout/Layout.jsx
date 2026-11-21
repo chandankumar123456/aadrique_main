@@ -5,6 +5,7 @@ import Lenis from "lenis";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { LoadingScreen } from "@/components/layout/LoadingScreen";
+import { ProgrammePromoBar } from "@/components/programme/ProgrammePromoBar";
 import { getLocal, setLocal, prefersLight, prefersReducedMotion } from "@/lib/storage";
 
 const useTheme = () => {
@@ -71,6 +72,7 @@ export default function Layout() {
         </motion.main>
       </AnimatePresence>
       <Footer />
+      <ProgrammePromoBar />
     </div>
   );
 }

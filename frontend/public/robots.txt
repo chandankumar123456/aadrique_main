@@ -3,5 +3,7 @@ Allow: /
 
 # The API serves JSON only — nothing to index, and /api/enquiries is private.
 Disallow: /api/
+# Internal admin screens.
+Disallow: /admin
 
 Sitemap: https://www.aadrique.in/sitemap.xml

@@ -29,7 +29,7 @@ export default function NotFound() {
           </Reveal>
           <Reveal delay={0.5}>
             <Link
-              to="/"
+              to="/home"
               data-testid="not-found-home-link"
               className="group mt-8 inline-flex items-center gap-3 bg-accent text-[#0A0A0A] px-10 py-4 font-grotesk font-medium tracking-wide hover:bg-inkStrong hover:text-bg transition-colors duration-300"
             >

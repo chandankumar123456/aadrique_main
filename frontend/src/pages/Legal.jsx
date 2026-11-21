@@ -3,13 +3,13 @@ import { LineReveal, Reveal } from "@/components/motion/Reveal";
 
 const PRIVACY = {
   title: "Privacy Policy",
-  updated: "Last updated: 1 June 2026",
+  updated: "Last updated: 21 November 2026",
   sections: [
     { h: "1. Who we are", p: "AADRIQUE TECH PVT LTD ('AADRIQUE', 'we', 'us') operates www.aadrique.in. This policy explains what personal data we collect through this website, why we collect it, and how we handle it. For any privacy question, contact info@aadrique.in." },
-    { h: "2. Data we collect", p: "When you submit our contact form we collect the details you provide: name, company, role, email, phone number, service interest, budget range and your message. We also collect standard technical data (IP address, browser type) in server logs for security and reliability purposes." },
-    { h: "3. How we use your data", p: "We use contact form data solely to respond to your enquiry, prepare for consultations you request, and maintain a record of our correspondence. We do not sell personal data, and we do not use it for unsolicited marketing without your consent." },
+    { h: "2. Data we collect", p: "When you submit our contact form we collect the details you provide: name, company, role, email, phone number, service interest, budget range and your message. When you apply for the Complete AI Engineering Programme you sign in with Google, and we receive your name, email address and profile picture from your Google account (never your password); we also collect the application details you provide: phone number, college, year of study, branch, city, Python experience, your goals and how you heard about us. We also collect standard technical data (IP address, browser type) in server logs for security and reliability purposes." },
+    { h: "3. How we use your data", p: "We use contact form data solely to respond to your enquiry, prepare for consultations you request, and maintain a record of our correspondence. We use programme application data to assess and process your application, contact you about it by phone, WhatsApp or email, and administer your admission if you enrol. We do not sell personal data, and we do not use it for unsolicited marketing without your consent." },
     { h: "4. Legal basis", p: "We process your data on the basis of your consent (submitted via the form), our legitimate interest in responding to business enquiries, and compliance with applicable law, including India's Digital Personal Data Protection Act (DPDP) and, where applicable, the GDPR." },
-    { h: "5. Retention", p: "Enquiry data is retained for as long as needed to handle your enquiry and any resulting business relationship, after which it is deleted or anonymised. You may request deletion at any time." },
+    { h: "5. Retention", p: "Enquiry data is retained for as long as needed to handle your enquiry and any resulting business relationship, after which it is deleted or anonymised. Programme application data is retained for the duration of the admission cycle and, if you enrol, for the duration of the programme and related certification. You may request deletion at any time." },
     { h: "6. Sharing", p: "We do not share your personal data with third parties except service providers essential to operating this website (hosting, infrastructure), bound by confidentiality, or where required by law." },
     { h: "7. Your rights", p: "You may request access to, correction of, or deletion of your personal data, and withdraw consent at any time by writing to info@aadrique.in. We respond to verified requests within 30 days." },
     { h: "8. Changes", p: "We may update this policy from time to time. The 'last updated' date above reflects the current version. Material changes will be highlighted on this page." },
@@ -32,8 +32,20 @@ const TERMS = {
   ],
 };
 
+const REFUND = {
+  title: "Refund & Cancellation Policy",
+  updated: "Last updated: 21 November 2026",
+  sections: [
+    { h: "1. Scope", p: "This policy applies to fees paid for the Complete AI Engineering Programme offered by AADRIQUE TECH PVT LTD ('AADRIQUE'), including early-bird and regular fees, deposits and part-payments." },
+    { h: "2. No refunds", p: "All programme fees are non-refundable once paid. This includes deposits and partial payments made to hold a seat. Please review the programme details, schedule and curriculum carefully before paying." },
+    { h: "3. Cancellation by the student", p: "If you choose to withdraw from the programme, before or after it starts, no refund is issued for any amount already paid. Every live session is recorded, so a missed class does not mean missed content." },
+    { h: "4. Payments that cannot be verified", p: "Seats are confirmed only after we verify your payment. If a transaction you report cannot be matched to a payment we received, it will be marked as not found and your seat will not be confirmed for that amount." },
+    { h: "5. Questions", p: "For any question about payments or this policy, contact info@aadrique.in or +91 96528 86208 before paying." },
+  ],
+};
+
 export default function Legal({ page }) {
-  const doc = page === "privacy" ? PRIVACY : TERMS;
+  const doc = page === "privacy" ? PRIVACY : page === "refund" ? REFUND : TERMS;
 
   return (
     <div data-testid={`legal-page-${page}`}>
